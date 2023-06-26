@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Windows.Forms;
 
 namespace ConfigCadAutoruns
 {
@@ -22,7 +23,8 @@ namespace ConfigCadAutoruns
             R231,
         }
 
-        private static Dictionary<RVER, KeyValuePair<string, string>> rverTo804 = new Dictionary<RVER, KeyValuePair<string, string>>()
+        private static Dictionary<RVER, KeyValuePair<string, string>> rverTo804 = 
+            new Dictionary<RVER, KeyValuePair<string, string>>()
         {
             { RVER.R190, new KeyValuePair<string, string>("R19.0", "ACAD-B001:804") },
             { RVER.R191, new KeyValuePair<string, string>("R19.1", "ACAD-D001:804") },
@@ -35,9 +37,11 @@ namespace ConfigCadAutoruns
         };
 
 
-        public static bool InstallAutoRun(RVER rver, string businessKey, string pluginPath, string pluginDesc="", int loadCtrls=2, int managed=1)
+        public static bool InstallAutoRun(RVER rver, string businessKey, string pluginPath, 
+            string pluginDesc="", int loadCtrls=2, int managed=1)
         {
-            string subKey = string.Format(@"SOFTWARE\Autodesk\AutoCAD\{0}\{1}\Applications", rverTo804[rver].Key, rverTo804[rver].Value);
+            string subKey = string.Format(@"SOFTWARE\Autodesk\AutoCAD\{0}\{1}\Applications", 
+                rverTo804[rver].Key, rverTo804[rver].Value);
 
             try
             {
@@ -64,7 +68,8 @@ namespace ConfigCadAutoruns
 
         public static bool InstallSupportPath(RVER rver, string dirPath)
         {
-            string subKey = string.Format(@"Software\Autodesk\AutoCAD\{0}\{1}\Profiles", rverTo804[rver].Key, rverTo804[rver].Value);
+            string subKey = string.Format(@"Software\Autodesk\AutoCAD\{0}\{1}\Profiles", 
+                rverTo804[rver].Key, rverTo804[rver].Value);
 
             try
             {
@@ -80,7 +85,7 @@ namespace ConfigCadAutoruns
                     {
                         try
                         {
-                            if (string.IsNullOrWhiteSpace(profilesName))
+                            if (string.IsNullOrEmpty(profilesName))
                                 continue;
 
                             using (var generalKey = profilesKey.OpenSubKey(profilesName + @"\General", true))
@@ -89,7 +94,8 @@ namespace ConfigCadAutoruns
                                     continue;
 
                                 var supportPathsStr = generalKey.GetValue("ACAD") as string;
-                                var supportPaths = supportPathsStr.Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries).ToList();
+                                var supportPaths = supportPathsStr.Split(new char[] { ';' }, 
+                                    StringSplitOptions.RemoveEmptyEntries).ToList();
                                 bool bHad = false;
                                 foreach (var path in supportPaths)
                                 {
@@ -103,7 +109,7 @@ namespace ConfigCadAutoruns
                                     continue;
 
                                 supportPaths.Add(dirPath);
-                                supportPathsStr = string.Join(";", supportPaths);
+                                supportPathsStr = string.Join(";", supportPaths.ToArray());
                                 generalKey.SetValue("ACAD", supportPathsStr, RegistryValueKind.ExpandString);
                             }
                         }
@@ -123,7 +129,8 @@ namespace ConfigCadAutoruns
 
         public static bool InstallTrustedPath(RVER rver, string dirPath)
         {
-            string subKey = string.Format(@"Software\Autodesk\AutoCAD\{0}\{1}\Profiles", rverTo804[rver].Key, rverTo804[rver].Value);
+            string subKey = string.Format(@"Software\Autodesk\AutoCAD\{0}\{1}\Profiles", 
+                rverTo804[rver].Key, rverTo804[rver].Value);
 
             try
             {
@@ -139,7 +146,7 @@ namespace ConfigCadAutoruns
                     {
                         try
                         {
-                            if (string.IsNullOrWhiteSpace(profilesName))
+                            if (string.IsNullOrEmpty(profilesName))
                                 continue;
 
                             using (var variablesKey = profilesKey.OpenSubKey(profilesName + @"\Variables", true))
@@ -148,7 +155,8 @@ namespace ConfigCadAutoruns
                                     continue;
 
                                 var trustedPathsStr = variablesKey.GetValue("TRUSTEDPATHS") as string;
-                                var trustedPaths = trustedPathsStr.Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries).ToList();
+                                var trustedPaths = trustedPathsStr.Split(new char[] { ';' }, 
+                                    StringSplitOptions.RemoveEmptyEntries).ToList();
                                 bool bHad = false;
                                 foreach (var path in trustedPaths)
                                 {
@@ -162,7 +170,7 @@ namespace ConfigCadAutoruns
                                     continue;
 
                                 trustedPaths.Add(dirPath);
-                                trustedPathsStr = string.Join(";", trustedPaths);
+                                trustedPathsStr = string.Join(";", trustedPaths.ToArray());
                                 variablesKey.SetValue("TRUSTEDPATHS", trustedPathsStr, RegistryValueKind.String);
                             }
                         }
@@ -183,7 +191,8 @@ namespace ConfigCadAutoruns
 
         public static bool UninstallAutoRun(RVER rver, string businessKey)
         {
-            string subKey = string.Format(@"SOFTWARE\Autodesk\AutoCAD\{0}\{1}\Applications", rverTo804[rver].Key, rverTo804[rver].Value);
+            string subKey = string.Format(@"SOFTWARE\Autodesk\AutoCAD\{0}\{1}\Applications", 
+                rverTo804[rver].Key, rverTo804[rver].Value);
             RegistryKey appKey = Registry.LocalMachine.OpenSubKey(subKey, true);
             if (appKey == null)
                 return false;
@@ -202,7 +211,8 @@ namespace ConfigCadAutoruns
 
         public static bool UninstallSupportPath(RVER rver, string dirPath)
         {
-            string subKey = string.Format(@"Software\Autodesk\AutoCAD\{0}\{1}\Profiles", rverTo804[rver].Key, rverTo804[rver].Value);
+            string subKey = string.Format(@"Software\Autodesk\AutoCAD\{0}\{1}\Profiles", 
+                rverTo804[rver].Key, rverTo804[rver].Value);
 
             try
             {
@@ -218,7 +228,7 @@ namespace ConfigCadAutoruns
                     {
                         try
                         {
-                            if (string.IsNullOrWhiteSpace(profilesName))
+                            if (string.IsNullOrEmpty(profilesName))
                                 continue;
 
                             using (var generalKey = profilesKey.OpenSubKey(profilesName + @"\General", true))
@@ -227,7 +237,8 @@ namespace ConfigCadAutoruns
                                     continue;
 
                                 var supportPathsStr = generalKey.GetValue("ACAD") as string;
-                                var supportPaths = supportPathsStr.Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries).ToList();
+                                var supportPaths = supportPathsStr.Split(new char[] { ';' }, 
+                                    StringSplitOptions.RemoveEmptyEntries).ToList();
                                 var newSupportPaths = supportPaths.ToList();
                                 for (int i = 0; i < supportPaths.Count; ++i)
                                 {
@@ -239,7 +250,7 @@ namespace ConfigCadAutoruns
 
                                 if (newSupportPaths.Count < supportPaths.Count)
                                 {
-                                    supportPathsStr = string.Join(";", newSupportPaths);
+                                    supportPathsStr = string.Join(";", newSupportPaths.ToArray());
                                     generalKey.SetValue("ACAD", supportPathsStr, RegistryValueKind.ExpandString);
                                 }
                             }                            
@@ -260,7 +271,8 @@ namespace ConfigCadAutoruns
 
         public static bool UninstallTrustedPath(RVER rver, string dirPath)
         {
-            string subKey = string.Format(@"Software\Autodesk\AutoCAD\{0}\{1}\Profiles", rverTo804[rver].Key, rverTo804[rver].Value);
+            string subKey = string.Format(@"Software\Autodesk\AutoCAD\{0}\{1}\Profiles", 
+                rverTo804[rver].Key, rverTo804[rver].Value);
 
             try
             {
@@ -276,7 +288,7 @@ namespace ConfigCadAutoruns
                     {
                         try
                         {
-                            if (string.IsNullOrWhiteSpace(profilesName))
+                            if (string.IsNullOrEmpty(profilesName))
                                 continue;
 
                             using (var variablesKey = profilesKey.OpenSubKey(profilesName + @"\Variables", true))
@@ -285,7 +297,8 @@ namespace ConfigCadAutoruns
                                     continue;
 
                                 var trustedPathsStr = variablesKey.GetValue("TRUSTEDPATHS") as string;
-                                var trustedPaths = trustedPathsStr.Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries).ToList();
+                                var trustedPaths = trustedPathsStr.Split(new char[] { ';' }, 
+                                    StringSplitOptions.RemoveEmptyEntries).ToList();
                                 var newTrustedPaths = trustedPaths.ToList();
                                 for (int i = 0; i < trustedPaths.Count; ++i)
                                 {
@@ -297,7 +310,7 @@ namespace ConfigCadAutoruns
 
                                 if (newTrustedPaths.Count < trustedPaths.Count)
                                 {
-                                    trustedPathsStr = string.Join(";", newTrustedPaths);
+                                    trustedPathsStr = string.Join(";", newTrustedPaths.ToArray());
                                     variablesKey.SetValue("TRUSTEDPATHS", trustedPathsStr, RegistryValueKind.String);
                                 }
                             }           
@@ -320,7 +333,7 @@ namespace ConfigCadAutoruns
         {            
             string buzName = IniHelper.ReadString("AUTOLOAD", "Name", "", iniFile);//"BGY_SRD"
             string LOADER = IniHelper.ReadString("AUTOLOAD", "LOADER", "", iniFile);
-            if (string.IsNullOrWhiteSpace(buzName) || string.IsNullOrWhiteSpace(LOADER))
+            if (string.IsNullOrEmpty(buzName) || string.IsNullOrEmpty(LOADER))
             {
                 return false;
             }
@@ -329,38 +342,46 @@ namespace ConfigCadAutoruns
             int MANAGED = IniHelper.ReadInt("AUTOLOAD", "MANAGED", 1, iniFile);
 
             string dirPath = Path.GetDirectoryName(LOADER);
-            if (string.IsNullOrWhiteSpace(dirPath))
+            if (string.IsNullOrEmpty(dirPath))
             {
                 dirPath = System.IO.Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName) + "\\";
                 LOADER = dirPath + Path.GetFileName(LOADER);
             }
 
-            RegistrySetup.InstallAutoRun(RegistrySetup.RVER.R190, buzName, LOADER, DESCRIPTION, LOADCTRLS, MANAGED);
-            RegistrySetup.InstallAutoRun(RegistrySetup.RVER.R191, buzName, LOADER, DESCRIPTION, LOADCTRLS, MANAGED);
-            RegistrySetup.InstallAutoRun(RegistrySetup.RVER.R200, buzName, LOADER, DESCRIPTION, LOADCTRLS, MANAGED);
-            RegistrySetup.InstallAutoRun(RegistrySetup.RVER.R201, buzName, LOADER, DESCRIPTION, LOADCTRLS, MANAGED);
-            RegistrySetup.InstallAutoRun(RegistrySetup.RVER.R210, buzName, LOADER, DESCRIPTION, LOADCTRLS, MANAGED);
-            RegistrySetup.InstallAutoRun(RegistrySetup.RVER.R220, buzName, LOADER, DESCRIPTION, LOADCTRLS, MANAGED);
-            RegistrySetup.InstallAutoRun(RegistrySetup.RVER.R230, buzName, LOADER, DESCRIPTION, LOADCTRLS, MANAGED);
-            RegistrySetup.InstallAutoRun(RegistrySetup.RVER.R231, buzName, LOADER, DESCRIPTION, LOADCTRLS, MANAGED);
+            //注册所有版本的AutoCAD
+            foreach (RegistrySetup.RVER ver in Enum.GetValues(typeof(RegistrySetup.RVER)))
+            {
+                RegistrySetup.InstallAutoRun(ver, buzName, LOADER, DESCRIPTION, LOADCTRLS, MANAGED);
+                RegistrySetup.InstallSupportPath(ver, dirPath);
+                RegistrySetup.InstallTrustedPath(ver, dirPath);
+            }
 
-            RegistrySetup.InstallSupportPath(RegistrySetup.RVER.R190, dirPath);
-            RegistrySetup.InstallSupportPath(RegistrySetup.RVER.R191, dirPath);
-            RegistrySetup.InstallSupportPath(RegistrySetup.RVER.R200, dirPath);
-            RegistrySetup.InstallSupportPath(RegistrySetup.RVER.R201, dirPath);
-            RegistrySetup.InstallSupportPath(RegistrySetup.RVER.R210, dirPath);
-            RegistrySetup.InstallSupportPath(RegistrySetup.RVER.R220, dirPath);
-            RegistrySetup.InstallSupportPath(RegistrySetup.RVER.R230, dirPath);
-            RegistrySetup.InstallSupportPath(RegistrySetup.RVER.R231, dirPath);
+            //RegistrySetup.InstallAutoRun(RegistrySetup.RVER.R190, buzName, LOADER, DESCRIPTION, LOADCTRLS, MANAGED);
+            //RegistrySetup.InstallAutoRun(RegistrySetup.RVER.R191, buzName, LOADER, DESCRIPTION, LOADCTRLS, MANAGED);
+            //RegistrySetup.InstallAutoRun(RegistrySetup.RVER.R200, buzName, LOADER, DESCRIPTION, LOADCTRLS, MANAGED);
+            //RegistrySetup.InstallAutoRun(RegistrySetup.RVER.R201, buzName, LOADER, DESCRIPTION, LOADCTRLS, MANAGED);
+            //RegistrySetup.InstallAutoRun(RegistrySetup.RVER.R210, buzName, LOADER, DESCRIPTION, LOADCTRLS, MANAGED);
+            //RegistrySetup.InstallAutoRun(RegistrySetup.RVER.R220, buzName, LOADER, DESCRIPTION, LOADCTRLS, MANAGED);
+            //RegistrySetup.InstallAutoRun(RegistrySetup.RVER.R230, buzName, LOADER, DESCRIPTION, LOADCTRLS, MANAGED);
+            //RegistrySetup.InstallAutoRun(RegistrySetup.RVER.R231, buzName, LOADER, DESCRIPTION, LOADCTRLS, MANAGED);
 
-            RegistrySetup.InstallTrustedPath(RegistrySetup.RVER.R190, dirPath);
-            RegistrySetup.InstallTrustedPath(RegistrySetup.RVER.R191, dirPath);
-            RegistrySetup.InstallTrustedPath(RegistrySetup.RVER.R200, dirPath);
-            RegistrySetup.InstallTrustedPath(RegistrySetup.RVER.R201, dirPath);
-            RegistrySetup.InstallTrustedPath(RegistrySetup.RVER.R210, dirPath);
-            RegistrySetup.InstallTrustedPath(RegistrySetup.RVER.R220, dirPath);
-            RegistrySetup.InstallTrustedPath(RegistrySetup.RVER.R230, dirPath);
-            RegistrySetup.InstallTrustedPath(RegistrySetup.RVER.R231, dirPath);
+            //RegistrySetup.InstallSupportPath(RegistrySetup.RVER.R190, dirPath);
+            //RegistrySetup.InstallSupportPath(RegistrySetup.RVER.R191, dirPath);
+            //RegistrySetup.InstallSupportPath(RegistrySetup.RVER.R200, dirPath);
+            //RegistrySetup.InstallSupportPath(RegistrySetup.RVER.R201, dirPath);
+            //RegistrySetup.InstallSupportPath(RegistrySetup.RVER.R210, dirPath);
+            //RegistrySetup.InstallSupportPath(RegistrySetup.RVER.R220, dirPath);
+            //RegistrySetup.InstallSupportPath(RegistrySetup.RVER.R230, dirPath);
+            //RegistrySetup.InstallSupportPath(RegistrySetup.RVER.R231, dirPath);
+
+            //RegistrySetup.InstallTrustedPath(RegistrySetup.RVER.R190, dirPath);
+            //RegistrySetup.InstallTrustedPath(RegistrySetup.RVER.R191, dirPath);
+            //RegistrySetup.InstallTrustedPath(RegistrySetup.RVER.R200, dirPath);
+            //RegistrySetup.InstallTrustedPath(RegistrySetup.RVER.R201, dirPath);
+            //RegistrySetup.InstallTrustedPath(RegistrySetup.RVER.R210, dirPath);
+            //RegistrySetup.InstallTrustedPath(RegistrySetup.RVER.R220, dirPath);
+            //RegistrySetup.InstallTrustedPath(RegistrySetup.RVER.R230, dirPath);
+            //RegistrySetup.InstallTrustedPath(RegistrySetup.RVER.R231, dirPath);
 
             return true;
         }
@@ -369,39 +390,47 @@ namespace ConfigCadAutoruns
         {
             string buzName = IniHelper.ReadString("AUTOLOAD", "Name", "", iniFile);//"BGY_SRD"
             string LOADER = IniHelper.ReadString("AUTOLOAD", "LOADER", "", iniFile);
-            if (string.IsNullOrWhiteSpace(buzName) || string.IsNullOrWhiteSpace(LOADER))
+            if (string.IsNullOrEmpty(buzName) || string.IsNullOrEmpty(LOADER))
             {
                 return false;
             }
 
             string dirPath = Path.GetDirectoryName(LOADER);
 
-            RegistrySetup.UninstallAutoRun(RegistrySetup.RVER.R190, buzName);
-            RegistrySetup.UninstallAutoRun(RegistrySetup.RVER.R191, buzName);
-            RegistrySetup.UninstallAutoRun(RegistrySetup.RVER.R200, buzName);
-            RegistrySetup.UninstallAutoRun(RegistrySetup.RVER.R201, buzName);
-            RegistrySetup.UninstallAutoRun(RegistrySetup.RVER.R210, buzName);
-            RegistrySetup.UninstallAutoRun(RegistrySetup.RVER.R220, buzName);
-            RegistrySetup.UninstallAutoRun(RegistrySetup.RVER.R230, buzName);
-            RegistrySetup.UninstallAutoRun(RegistrySetup.RVER.R231, buzName);
+            //反注册所有版本的AutoCAD
+            foreach (RegistrySetup.RVER ver in Enum.GetValues(typeof(RegistrySetup.RVER)))
+            {
+                RegistrySetup.UninstallAutoRun(ver, buzName);
+                RegistrySetup.UninstallSupportPath(ver, dirPath);
+                RegistrySetup.UninstallTrustedPath(ver, dirPath);
+            }
 
-            RegistrySetup.UninstallSupportPath(RegistrySetup.RVER.R190, dirPath);
-            RegistrySetup.UninstallSupportPath(RegistrySetup.RVER.R191, dirPath);
-            RegistrySetup.UninstallSupportPath(RegistrySetup.RVER.R200, dirPath);
-            RegistrySetup.UninstallSupportPath(RegistrySetup.RVER.R201, dirPath);
-            RegistrySetup.UninstallSupportPath(RegistrySetup.RVER.R210, dirPath);
-            RegistrySetup.UninstallSupportPath(RegistrySetup.RVER.R220, dirPath);
-            RegistrySetup.UninstallSupportPath(RegistrySetup.RVER.R230, dirPath);
-            RegistrySetup.UninstallSupportPath(RegistrySetup.RVER.R231, dirPath);
+            //RegistrySetup.UninstallAutoRun(RegistrySetup.RVER.R190, buzName);
+            //RegistrySetup.UninstallAutoRun(RegistrySetup.RVER.R191, buzName);
+            //RegistrySetup.UninstallAutoRun(RegistrySetup.RVER.R200, buzName);
+            //RegistrySetup.UninstallAutoRun(RegistrySetup.RVER.R201, buzName);
+            //RegistrySetup.UninstallAutoRun(RegistrySetup.RVER.R210, buzName);
+            //RegistrySetup.UninstallAutoRun(RegistrySetup.RVER.R220, buzName);
+            //RegistrySetup.UninstallAutoRun(RegistrySetup.RVER.R230, buzName);
+            //RegistrySetup.UninstallAutoRun(RegistrySetup.RVER.R231, buzName);
+
+            //RegistrySetup.UninstallSupportPath(RegistrySetup.RVER.R190, dirPath);
+            //RegistrySetup.UninstallSupportPath(RegistrySetup.RVER.R191, dirPath);
+            //RegistrySetup.UninstallSupportPath(RegistrySetup.RVER.R200, dirPath);
+            //RegistrySetup.UninstallSupportPath(RegistrySetup.RVER.R201, dirPath);
+            //RegistrySetup.UninstallSupportPath(RegistrySetup.RVER.R210, dirPath);
+            //RegistrySetup.UninstallSupportPath(RegistrySetup.RVER.R220, dirPath);
+            //RegistrySetup.UninstallSupportPath(RegistrySetup.RVER.R230, dirPath);
+            //RegistrySetup.UninstallSupportPath(RegistrySetup.RVER.R231, dirPath);
             
-            RegistrySetup.UninstallTrustedPath(RegistrySetup.RVER.R190, dirPath);
-            RegistrySetup.UninstallTrustedPath(RegistrySetup.RVER.R191, dirPath);
-            RegistrySetup.UninstallTrustedPath(RegistrySetup.RVER.R200, dirPath);
-            RegistrySetup.UninstallTrustedPath(RegistrySetup.RVER.R201, dirPath);
-            RegistrySetup.UninstallTrustedPath(RegistrySetup.RVER.R210, dirPath);
-            RegistrySetup.UninstallTrustedPath(RegistrySetup.RVER.R220, dirPath);
-            RegistrySetup.UninstallTrustedPath(RegistrySetup.RVER.R230, dirPath);
-            RegistrySetup.UninstallTrustedPath(RegistrySetup.RVER.R231, dirPath);
+            //RegistrySetup.UninstallTrustedPath(RegistrySetup.RVER.R190, dirPath);
+            //RegistrySetup.UninstallTrustedPath(RegistrySetup.RVER.R191, dirPath);
+            //RegistrySetup.UninstallTrustedPath(RegistrySetup.RVER.R200, dirPath);
+            //RegistrySetup.UninstallTrustedPath(RegistrySetup.RVER.R201, dirPath);
+            //RegistrySetup.UninstallTrustedPath(RegistrySetup.RVER.R210, dirPath);
+            //RegistrySetup.UninstallTrustedPath(RegistrySetup.RVER.R220, dirPath);
+            //RegistrySetup.UninstallTrustedPath(RegistrySetup.RVER.R230, dirPath);
+            //RegistrySetup.UninstallTrustedPath(RegistrySetup.RVER.R231, dirPath);
 
             return true;
         }
