@@ -30,7 +30,7 @@ namespace ConfigCadAutoruns
             else
             {
                 iniFile = System.IO.Path.GetDirectoryName(
-                    Process.GetCurrentProcess().MainModule.FileName) + "\\autoloadconfig.ini";
+                    Process.GetCurrentProcess().MainModule.FileName) + "\\AutoLoadConfig.ini";
             }
 
             int i = args.IndexOf("-i") != -1 ? args.IndexOf("-i") 
