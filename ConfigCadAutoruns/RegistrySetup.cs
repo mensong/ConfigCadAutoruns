@@ -341,12 +341,13 @@ namespace ConfigCadAutoruns
             int LOADCTRLS = IniHelper.ReadInt("AUTOLOAD", "LOADCTRLS", 2, iniFile);
             int MANAGED = IniHelper.ReadInt("AUTOLOAD", "MANAGED", 1, iniFile);
 
-            string dirPath = Path.GetDirectoryName(LOADER);
-            if (string.IsNullOrEmpty(dirPath))
-            {
-                dirPath = System.IO.Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName) + "\\";
-                LOADER = dirPath + Path.GetFileName(LOADER);
+            if (!LOADER.Contains(":"))
+            {//相对路径
+                string d = System.IO.Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName);
+                LOADER = Path.Combine(d, Path.GetFileName(LOADER));
             }
+
+            string dirPath = Path.GetDirectoryName(LOADER);
 
             //注册所有版本的AutoCAD
             foreach (RegistrySetup.RVER ver in Enum.GetValues(typeof(RegistrySetup.RVER)))
