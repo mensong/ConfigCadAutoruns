@@ -129,4 +129,7 @@
     </BootstrapperPackage>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>copy /Y "$(SolutionDir)AutoLoadConfig.ini" "$(SolutionDir)ConfigCadAutoruns\bin\$(ConfigurationName)\"</PostBuildEvent>
+  </PropertyGroup>
 </Project>
